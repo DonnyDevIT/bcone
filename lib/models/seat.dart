@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Seat {
   final int id;
   final int tableNumber;
@@ -10,6 +12,7 @@ class Seat {
   final int rowSpan;
   final int colSpan;
   final String? reservationName;
+  final Color? chosenColor;
 
   Seat({
     required this.id,
@@ -23,6 +26,7 @@ class Seat {
     this.rowSpan = 1,
     this.colSpan = 1,
     this.reservationName,
+    this.chosenColor,
   });
 
   Seat copyWith({
@@ -37,6 +41,7 @@ class Seat {
     int? rowSpan,
     int? colSpan,
     String? reservationName,
+    Color? chosenColor,
   }) {
     return Seat(
       id: id ?? this.id,
@@ -50,6 +55,7 @@ class Seat {
       rowSpan: rowSpan ?? this.rowSpan,
       colSpan: colSpan ?? this.colSpan,
       reservationName: reservationName ?? this.reservationName,
+      chosenColor: chosenColor ?? this.chosenColor,
     );
   }
 
@@ -66,6 +72,9 @@ class Seat {
       rowSpan: json['row_span'] as int,
       colSpan: json['col_span'] as int,
       reservationName: json['reservation_name'] as String?,
+      chosenColor: json['chosen_color'] != null
+          ? Color(int.parse(json['chosen_color'], radix: 16))
+          : null,
     );
   }
 }

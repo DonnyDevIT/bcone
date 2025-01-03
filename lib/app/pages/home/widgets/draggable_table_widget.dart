@@ -118,17 +118,28 @@ class _DraggableTableWidgetState extends State<DraggableTableWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          "T${widget.seat.tableNumber}",
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          "${widget.seat.occupantCount} p.",
-        ),
-        if (widget.seat.reservationName != null)
-          Text(
-            widget.seat.reservationName!,
+        Expanded(
+          child: Column(
+            children: [
+              Text(
+                "T${widget.seat.tableNumber}",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "${widget.seat.occupantCount} p.",
+              ),
+              if (widget.seat.reservationName != null)
+                Text(
+                  widget.seat.reservationName!,
+                ),
+            ],
           ),
+        ),
+        Container(
+          width: double.infinity,
+          height: 5,
+          color: widget.seat.chosenColor ?? Colors.black,
+        ),
       ],
     );
   }

@@ -17,13 +17,23 @@ class ReservationSheet extends StatefulWidget {
 }
 
 class _ReservationSheetState extends State<ReservationSheet> {
+  late Color? _chosenColor;
   late TextEditingController _nameController;
   late TextEditingController _occupantController;
+
+  final _colorOptions = [
+    Colors.blue,
+    Colors.purple,
+    Colors.yellow,
+    Colors.brown,
+    Colors.black,
+  ];
 
   @override
   void initState() {
     super.initState();
     _setEdit(true);
+    _chosenColor = widget.seat.chosenColor;
     _nameController =
         TextEditingController(text: widget.seat.reservationName ?? "");
     _occupantController =
@@ -81,6 +91,8 @@ class _ReservationSheetState extends State<ReservationSheet> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                _buildColorPicker(widget.seat),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -106,6 +118,33 @@ class _ReservationSheetState extends State<ReservationSheet> {
     );
   }
 
+  Widget _buildColorPicker(Seat seat) {
+    return Wrap(
+      spacing: 8,
+      children: _colorOptions.map((color) {
+        final isSelected = color == seat.chosenColor;
+        return InkWell(
+          onTap: () {
+            setState(() {
+              // aggiorni localmente
+              _chosenColor = color;
+            });
+          },
+          child: Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border:
+                  isSelected ? Border.all(color: Colors.white, width: 2) : null,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Future _save() async {
     final name = _nameController.text.trim();
     final occupantCount = int.tryParse(_occupantController.text.trim()) ?? 0;
@@ -113,6 +152,7 @@ class _ReservationSheetState extends State<ReservationSheet> {
     final updatedSeat = widget.seat.copyWith(
       reservationName: name.isEmpty ? null : name,
       occupantCount: occupantCount,
+      chosenColor: _chosenColor,
     );
 
     await widget.onSave(updatedSeat);
