@@ -48,6 +48,7 @@ class _TableMapState extends State<TableMap> {
                 areaWidth: areaWidth,
                 areaHeight: areaHeight,
                 onPositionChange: _handleSeatPositionChange,
+                onSave: _onSaveReservation,
               )
           ],
         );
@@ -55,7 +56,7 @@ class _TableMapState extends State<TableMap> {
     );
   }
 
-  void _handleSeatPositionChange(Seat updatedSeat) async {
+  Future _handleSeatPositionChange(Seat updatedSeat) async {
     setState(() {
       final index = widget.seats.indexWhere((s) => s.id == updatedSeat.id);
       if (index != -1) {
@@ -70,6 +71,22 @@ class _TableMapState extends State<TableMap> {
       // e se vuoi salvare anche col_span, row_span se l'utente li modifica
       // 'col_span': updatedSeat.colSpan,
       // 'row_span': updatedSeat.rowSpan,
+    }).eq('id', updatedSeat.id);
+  }
+
+  Future _onSaveReservation(updatedSeat) async {
+    // 1) Aggiorno la lista in memoria
+    setState(() {
+      final index = widget.seats.indexWhere((s) => s.id == updatedSeat.id);
+      if (index != -1) {
+        widget.seats[index] = updatedSeat;
+      }
+    });
+
+    // 2) Aggiorno su Supabase
+    await Supabase.instance.client.from('seats').update({
+      'reservation_name': updatedSeat.reservationName,
+      'occupant_count': updatedSeat.occupantCount,
     }).eq('id', updatedSeat.id);
   }
 }

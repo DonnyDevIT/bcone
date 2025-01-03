@@ -1,3 +1,4 @@
+import 'package:bcone/app/pages/home/widgets/reservation_sheet.dart';
 import 'package:bcone/models/seat.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ class DraggableTableWidget extends StatefulWidget {
   final double areaWidth;
   final double areaHeight;
   final ValueChanged<Seat> onPositionChange;
+  final Function(Seat updatedSeat) onSave;
 
   const DraggableTableWidget({
     super.key,
@@ -17,6 +19,7 @@ class DraggableTableWidget extends StatefulWidget {
     required this.areaWidth,
     required this.areaHeight,
     required this.onPositionChange,
+    required this.onSave,
   });
 
   @override
@@ -44,10 +47,13 @@ class _DraggableTableWidgetState extends State<DraggableTableWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final color = _decideColor(widget.seat);
+
     return Positioned(
       left: pixelLeft,
       top: pixelTop,
       child: GestureDetector(
+        onTap: () => _showReservationSheet(context, widget.seat),
         onPanUpdate: (details) {
           setState(() {
             pixelLeft += details.delta.dx;
@@ -88,13 +94,70 @@ class _DraggableTableWidgetState extends State<DraggableTableWidget> {
           widget.onPositionChange(updatedSeat);
         },
         child: Container(
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(
+              color: Colors.white,
+              width: 1,
+            ),
+          ),
           width: tableWidth,
           height: tableHeight,
-          color: Colors.blue,
-          alignment: Alignment.center,
-          child: Text("T${widget.seat.id}"),
+          padding: const EdgeInsets.all(2),
+          child: _buildTableContent(),
         ),
       ),
+    );
+  }
+
+  Widget _buildTableContent() {
+    // Ad esempio mostri:
+    // 1) T + table_number
+    // 2) occupantCount con “p.”
+    // 3) reservationName se esiste
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          "T${widget.seat.tableNumber}",
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "${widget.seat.occupantCount} p.",
+        ),
+        if (widget.seat.reservationName != null)
+          Text(
+            widget.seat.reservationName!,
+          ),
+      ],
+    );
+  }
+
+  Color _decideColor(Seat seat) {
+    // 1) Se is_editing = true -> arancione
+    if (seat.isEditing == true) {
+      return Colors.orange[400]!;
+    }
+    // 2) Se occupantCount > 0 -> rosso
+    else if (seat.occupantCount > 0) {
+      return Colors.red[400]!;
+    }
+    // 3) Altrimenti (occupantCount == 0) -> verde
+    else {
+      return Colors.green[400]!;
+    }
+  }
+
+  void _showReservationSheet(BuildContext context, Seat seat) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return ReservationSheet(
+          seat: seat,
+          onSave: widget.onSave,
+        );
+      },
     );
   }
 }
